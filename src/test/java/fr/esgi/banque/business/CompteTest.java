@@ -51,4 +51,48 @@ class CompteTest {
 		);
 	}
 
+	// C2 : Le solde initial et le découvert autorisé sont obligatoires. Le découvert autorisé est positif ou nul. Sinon IllegalArgumentException.
+
+	@Test
+	@DisplayName("Vérifier solde si Null retourne une exception")
+	void VerifierSoldeSiNullRetourneUneException() {
+		assertThrows(IllegalArgumentException.class, () ->
+				new Compte("FR001", "Alice", null, new BigDecimal("200"))
+		);
+	}
+
+	@Test
+	@DisplayName("Vérifier le découvert si Null retourne une exception")
+	void VerifierLeDecouvertSiNullRetourneUneException() {
+		assertThrows(IllegalArgumentException.class, () ->
+				new Compte("FR001", "Alice", new BigDecimal("100.00"), null)
+		);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"0", "100.00"})
+	@DisplayName("Vérifier le découvert si il est à 0 ou positif alors ne retourne pas d'erreur")
+	void VerifierLeDecouvertSiEst0RetournePasDerreur(String valeur) {
+		//Arrange
+		BigDecimal decouvertAutoriser = new BigDecimal(valeur);
+
+		//Act
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), decouvertAutoriser);
+
+		//Assert
+		assertThat(compte.getDecouvertAutorise()).isEqualByComparingTo(decouvertAutoriser);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"-0.01", "-100.00"})
+	@DisplayName("Refuser un découvert autorisé négatif")
+	void verifierDecouvertAutoriseNegatifRetourneUneException(String decouvert) {
+		//Arrange
+		BigDecimal decouvertAutorise = new BigDecimal(decouvert);
+
+		//Act / Assert
+		assertThrows(IllegalArgumentException.class, () ->
+				new Compte("FR001", "Alice", new BigDecimal("100.00"), decouvertAutorise));
+	}
+
 }
