@@ -83,4 +83,24 @@ public class CalculFraisTest {
         assertThat(frais).isEqualByComparingTo(fraisAttendus);
     }
 
+    // F4	Les frais de tenue sont offerts si le solde moyen atteint 1 000 € ou plus.
+
+    @ParameterizedTest
+    @CsvSource({
+            "500, 2.00",
+            "1000, 0.00",
+            "1500, 0.00"
+    })
+    @DisplayName("Vérifier si les frais sont offerts si le solde moyen atteint 1k €")
+    void VerifierFraisOffertsPourSoldeMoyenDe1000(String soldeMoyen, String fraisAttendus) {
+        //Arrange
+        CalculFrais calculFrais = new CalculFrais();
+
+        //Act
+        BigDecimal frais = calculFrais.fraisMensuels(30, new BigDecimal(soldeMoyen), false);
+
+        //Assert
+        assertThat(frais).isEqualByComparingTo(fraisAttendus);
+    }
+
 }
