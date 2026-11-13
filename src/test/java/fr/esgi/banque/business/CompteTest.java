@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
@@ -142,6 +143,45 @@ class CompteTest {
 
 		//Act / Assert
 		assertThrows(IllegalArgumentException.class, () -> compte.crediter(null));
+		assertThat(compte.getSolde()).isEqualByComparingTo("100.00");
+	}
+
+	// C4	debiter n'accepte qu'un montant strictement positif. Sinon IllegalArgumentException.
+
+	@Test
+	@DisplayName("Vérifier si un montant débiter est négatif retourne une erreur")
+	void VerifierSiMontantDebiterNegatifRetourneUneErreur() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+
+		//Assert
+		assertThrows(IllegalArgumentException.class, () -> compte.debiter(new BigDecimal("-10.00")));
+	}
+
+	@Test
+	@DisplayName("Vérifier si un montant débiter est positif ne retourne pas une erreur")
+	void VerifierSiMontantDebiterPositifNeRetournePasUneErreur() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+
+		//Act
+		compte.debiter(new BigDecimal("10.00"));
+
+		//Assert
+		assertThat(compte.getSolde()).isEqualByComparingTo(new BigDecimal("90.00"));
+	}
+
+	@ParameterizedTest
+	@NullSource
+	@ValueSource(strings = {"0", "0.00"})
+	@DisplayName("Refuser un débit null ou égal à zéro sans modifier le solde")
+	void verifierDebitNullOuZeroRetourneUneException(String montant) {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+		BigDecimal montantADebiter = montant == null ? null : new BigDecimal(montant);
+
+		//Act / Assert
+		assertThrows(IllegalArgumentException.class, () -> compte.debiter(montantADebiter));
 		assertThat(compte.getSolde()).isEqualByComparingTo("100.00");
 	}
 
