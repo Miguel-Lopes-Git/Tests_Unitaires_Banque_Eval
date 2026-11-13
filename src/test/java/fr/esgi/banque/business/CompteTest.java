@@ -95,4 +95,54 @@ class CompteTest {
 				new Compte("FR001", "Alice", new BigDecimal("100.00"), decouvertAutorise));
 	}
 
+	// C3	crediter n'accepte qu'un montant strictement positif. Sinon IllegalArgumentException.
+
+	@Test
+	@DisplayName("Vérifier si un montant créditer est négatif retourne une erreur")
+	void VerifierSiMontantCrediterNegatifRetourneUneErreur() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+		BigDecimal montantACrediter = new BigDecimal("-10.00");
+
+		//Assert
+		assertThrows(IllegalArgumentException.class, () -> compte.crediter(montantACrediter));
+	}
+
+	@Test
+	@DisplayName("Vérifier si un montant créditer est positif ne retourne pas une erreur")
+	void VerifierSiMontantCrediterPositifNeRetournePasDerreur() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+		BigDecimal montantACrediter = new BigDecimal("10.00");
+
+		//Act
+		compte.crediter(montantACrediter);
+
+		//Assert
+		assertThat(compte.getSolde()).isEqualByComparingTo(new BigDecimal("110.00"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"0", "0.00"})
+	@DisplayName("Refuser un crédit de zéro quelle que soit son écriture")
+	void verifierCreditDeZeroRetourneUneException(String montant) {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+
+		//Act / Assert
+		assertThrows(IllegalArgumentException.class, () -> compte.crediter(new BigDecimal(montant)));
+		assertThat(compte.getSolde()).isEqualByComparingTo("100.00");
+	}
+
+	@Test
+	@DisplayName("Refuser un crédit null sans modifier le solde")
+	void verifierCreditNullRetourneUneException() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+
+		//Act / Assert
+		assertThrows(IllegalArgumentException.class, () -> compte.crediter(null));
+		assertThat(compte.getSolde()).isEqualByComparingTo("100.00");
+	}
+
 }
