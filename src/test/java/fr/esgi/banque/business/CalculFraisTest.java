@@ -62,4 +62,25 @@ public class CalculFraisTest {
         assertThat(frais).isEqualByComparingTo(new BigDecimal("2.00"));
     }
 
+    // F3	Les frais de tenue sont offerts aux titulaires de moins de 26 ans.
+
+    @ParameterizedTest
+    @CsvSource({
+            "18, 0.00",
+            "25, 0.00",
+            "26, 2.00",
+            "27, 2.00"
+    })
+    @DisplayName("Vérifier que les frais de compte sont gratuit pour les moins de 26 ans")
+    void VerifierFraisDeCompteGratuitPourMoinsDe26Ans(int age, String fraisAttendus) {
+        //Arrange
+        CalculFrais calculFrais = new CalculFrais();
+
+        //Act
+        BigDecimal frais = calculFrais.fraisMensuels(age, new BigDecimal("500.00"), false);
+
+        //Assert
+        assertThat(frais).isEqualByComparingTo(fraisAttendus);
+    }
+
 }
