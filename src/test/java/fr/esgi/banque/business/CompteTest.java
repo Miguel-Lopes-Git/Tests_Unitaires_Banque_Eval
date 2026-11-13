@@ -211,4 +211,30 @@ class CompteTest {
 		assertThat(compte.getSolde()).isEqualByComparingTo("-200.00");
 	}
 
+	// C6	estVide() est vrai quand le solde vaut zéro, quelle que soit son écriture (0, 0.00...).
+
+	@ParameterizedTest
+	@ValueSource(strings = {"0", "0.00"})
+	@DisplayName("Vérifier que la fonction estVide() retourne True quand le solde est à 0")
+	void VerifierFonctionEstVideRetourneTrueQuandLeSoldeEstA0(String soldeInitial) {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal(soldeInitial), new BigDecimal("200"));
+
+		assertTrue(compte.estVide());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"-0.01", "10.00"})
+	@DisplayName("Un solde non nul ne correspond pas à un compte vide")
+	void verifierEstVideRetourneFalseQuandLeSoldeEstNonNul(String soldeInitial) {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal(soldeInitial), new BigDecimal("200"));
+
+		//Act
+		boolean vide = compte.estVide();
+
+		//Assert
+		assertFalse(vide);
+	}
+
 }
