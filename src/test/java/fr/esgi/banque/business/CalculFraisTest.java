@@ -47,4 +47,19 @@ public class CalculFraisTest {
         assertThrows(IllegalArgumentException.class, () -> calculFrais.fraisMensuels( 30, null, false));
     }
 
+    // F2	Les frais de tenue de compte sont de 2,00 € par mois.
+
+    @Test
+    @DisplayName("Vérifier que les frais de compte sont à 2€")
+    void VerifierFraisDeCompteA2Euros() {
+        //Arrange
+        CalculFrais calculFrais = new CalculFrais();
+
+        //Act
+        BigDecimal frais = calculFrais.fraisMensuels(30, new BigDecimal("500.00"), false);
+
+        //Assert
+        assertThat(frais).isEqualByComparingTo(new BigDecimal("2.00"));
+    }
+
 }
