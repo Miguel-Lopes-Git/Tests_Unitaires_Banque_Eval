@@ -185,4 +185,30 @@ class CompteTest {
 		assertThat(compte.getSolde()).isEqualByComparingTo("100.00");
 	}
 
+	// C5	Un débit est accepté tant que le solde ne passe pas sous -découvertAutorisé. Atteindre exactement la limite est autorisé. Au-delà : SoldeInsuffisantException, et le solde ne change pas.
+
+	@Test
+	@DisplayName("Vérifier que si le solde passe en dessous du découvert autorisé retourne une erreur")
+	void VerifierSiSoldePasseEnDessousDuDecouvertAutoriseRetourneUneErreur() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+
+		//Act / Assert
+		assertThrows(SoldeInsuffisantException.class, () -> compte.debiter(new BigDecimal("301")));
+		assertThat(compte.getSolde()).isEqualByComparingTo("100.00");
+	}
+
+	@Test
+	@DisplayName("Vérifier que si le solde passe au max du découvert autorisé retourne pas une erreur")
+	void VerifierSiSoldePasseAuMaxDuDecouvertAutoriseNeRetournePasUneErreur() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("100.00"), new BigDecimal("200"));
+
+		//Act
+		compte.debiter(new BigDecimal("300.00"));
+
+		//Assert
+		assertThat(compte.getSolde()).isEqualByComparingTo("-200.00");
+	}
+
 }
