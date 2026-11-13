@@ -103,4 +103,27 @@ public class CalculFraisTest {
         assertThat(frais).isEqualByComparingTo(fraisAttendus);
     }
 
+    // F5	Une carte premium ajoute 5,00 € par mois. Ce supplément est toujours dû, même quand la tenue est offerte.
+
+    @ParameterizedTest
+    @CsvSource({
+            "18, 500, 5.00",
+            "25, 500, 5.00",
+            "25, 1000, 5.00",
+            "26, 500, 7.00",
+            "30, 500, 7.00",
+            "30, 1000, 5.00",
+            "30, 1500, 5.00"
+    })
+    @DisplayName("Vérifier le supplément premium avec et sans gratuité")
+    void VerifierSiFraisCartePremiumSappliquePourPlusDe1k(int age, String soldeMoyen, String fraisAttendus) {
+        //Arrange
+        CalculFrais calculFrais = new CalculFrais();
+
+        //Act
+        BigDecimal frais = calculFrais.fraisMensuels(age, new BigDecimal(soldeMoyen), true);
+
+        //Assert
+        assertThat(frais).isEqualByComparingTo(fraisAttendus);
+    }
 }
