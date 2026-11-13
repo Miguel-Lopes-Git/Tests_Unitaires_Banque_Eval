@@ -237,4 +237,30 @@ class CompteTest {
 		assertFalse(vide);
 	}
 
+	// C7	estADecouvert() est vrai quand le solde est strictement négatif.
+
+	@Test
+	@DisplayName("Vérifier que la fonction estADecouvert est vrai quand le sole est strictement négatif")
+	void VerifierFonctionEstADecouvertEstVraiQuandSoldeEstStrictementNegatif() {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal("-10.00"), new BigDecimal("200"));
+
+		assertTrue(compte.estADecouvert());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"0", "0.00", "10.00"})
+	@DisplayName("Un solde nul ou positif ne correspond pas à un découvert")
+	void VerifierFonctionEstADecouvertEstFalseQuandSoldeNEstPasStrictementNegatif(String soldeInitial) {
+		//Arrange
+		Compte compte = new Compte("FR001", "Alice", new BigDecimal(soldeInitial), new BigDecimal("200"));
+
+		//Act
+		boolean aDecouvert = compte.estADecouvert();
+
+		//Assert
+		assertFalse(aDecouvert);
+	}
+
+	//
 }
