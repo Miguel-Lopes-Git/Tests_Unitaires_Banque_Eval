@@ -29,9 +29,7 @@ public class VirementServiceImpl {
     public Virement virer(String numeroSource, String numeroDestination, BigDecimal montant) {
         verifierParametres(numeroSource, numeroDestination, montant);
 
-        if (LocalDate.now(horloge).getDayOfWeek() == DayOfWeek.SUNDAY) {
-            throw new VirementRefuseException("Les virements sont refusés le dimanche");
-        }
+        verifierJourAutorise();
 
         Compte source = trouverCompte(numeroSource);
         Compte destination = trouverCompte(numeroDestination);
@@ -63,6 +61,12 @@ public class VirementServiceImpl {
     private void alerterSiMontantImportant(Compte source, BigDecimal montant) {
         if (montant.compareTo(SEUIL_ALERTE) > 0) {
             notifications.alerter(source.getTitulaire(), "Virement important : " + montant + " €");
+        }
+    }
+
+    private void verifierJourAutorise() {
+        if (LocalDate.now(horloge).getDayOfWeek() == DayOfWeek.SUNDAY) {
+            throw new VirementRefuseException("Les virements sont refusés le dimanche");
         }
     }
 }
