@@ -1,5 +1,10 @@
 package fr.esgi.banque.service.impl;
 
+import fr.esgi.banque.business.Virement;
+import java.time.LocalDate;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import fr.esgi.banque.business.Compte;
 import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
@@ -97,4 +102,31 @@ class VirementServiceImplTest {
         // Assert
         assertThrows(CompteIntrouvableException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
     }
+
+    // V4	Cas nominal : le compte source est débité, le compte destination est crédité, les deux comptes sont sauvegardés. Le Virement renvoyé contient la date du jour.
+    @Test
+    @DisplayName("Effectuer un virement et renvoyer ses informations")
+    void verifierVirementDebiteCrediteSauvegardeEtRetourneLaDate() {
+        // Arrange
+        BigDecimal montant = new BigDecimal("10");
+
+        Compte source = new Compte(NUMERO_SOURCE, "Test", new BigDecimal("100"), new BigDecimal("200"));
+        Compte destination = new Compte(NUMERO_DESTINATION, "Test2", new BigDecimal("50"), BigDecimal.ZERO);
+
+        when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
+        when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.of(destination));
+
+        // Act
+        Virement virement = service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant);
+
+        // Assert
+        assertThat(source.getSolde()).isEqualByComparingTo("90");
+        assertThat(destination.getSolde()).isEqualByComparingTo("60");
+
+        verify(repository).sauvegarder(source);
+        verify(repository).sauvegarder(destination);
+
+        assertEquals(new Virement(NUMERO_SOURCE, NUMERO_DESTINATION, montant, LocalDate.of(2026, 11, 13)), virement);
+    }
+
 }
