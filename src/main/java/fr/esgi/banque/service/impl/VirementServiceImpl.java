@@ -28,13 +28,11 @@ public class VirementServiceImpl {
         Compte source = trouverCompte(numeroSource);
         Compte destination = trouverCompte(numeroDestination);
 
-        try {
-            source.debiter(montant);
-            destination.crediter(montant);
-        } finally {
-            repository.sauvegarder(source);
-            repository.sauvegarder(destination);
-        }
+        source.debiter(montant);
+        destination.crediter(montant);
+
+        repository.sauvegarder(source);
+        repository.sauvegarder(destination);
 
 
         return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
