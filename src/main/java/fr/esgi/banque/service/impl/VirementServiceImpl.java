@@ -16,6 +16,8 @@ public class VirementServiceImpl {
     private final NotificationService notifications;
     private final Clock horloge;
 
+    private static final BigDecimal SEUIL_ALERTE = new BigDecimal("10000");
+
     public VirementServiceImpl(CompteRepository repository, NotificationService notifications, Clock horloge) {
         this.repository = repository;
         this.notifications = notifications;
@@ -34,9 +36,7 @@ public class VirementServiceImpl {
         repository.sauvegarder(source);
         repository.sauvegarder(destination);
 
-        if (montant.compareTo(new BigDecimal("10000")) > 0) {
-            notifications.alerter(source.getTitulaire(), "Virement important : " + montant + " €");
-        }
+        alerterSiMontantImportant(source, montant);
 
         return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
     }
@@ -52,5 +52,11 @@ public class VirementServiceImpl {
 
     private Compte trouverCompte(String numero) {
         return repository.trouver(numero).orElseThrow(() -> new CompteIntrouvableException((numero)));
+    }
+
+    private void alerterSiMontantImportant(Compte source, BigDecimal montant) {
+        if (montant.compareTo(SEUIL_ALERTE) > 0) {
+            notifications.alerter(source.getTitulaire(), "Virement important : " + montant + " €");
+        }
     }
 }
