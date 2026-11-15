@@ -3,6 +3,9 @@ package fr.esgi.banque.service.impl;
 import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
+import fr.esgi.banque.business.Compte;
+import fr.esgi.banque.business.Virement;
+import java.time.LocalDate;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -19,18 +22,29 @@ public class VirementServiceImpl {
         this.horloge = horloge;
     }
 
-    public void virer(String numeroSource, String numeroDestination, BigDecimal montant) {
+    public Virement virer(String numeroSource, String numeroDestination, BigDecimal montant) {
         if (montant == null || montant.signum() <= 0) {
             throw new IllegalArgumentException("Le montant du virement doit être strictement positif");
         }
         if (numeroSource.equals(numeroDestination)) {
             throw new IllegalArgumentException("Un virement ne peut pas être effectué vers le même compte");
         }
-        trouverCompte(numeroSource);
-        trouverCompte(numeroDestination);
+        Compte source = trouverCompte(numeroSource);
+        Compte destination = trouverCompte(numeroDestination);
+
+        try {
+            source.debiter(montant);
+            destination.crediter(montant);
+        } finally {
+            repository.sauvegarder(source);
+            repository.sauvegarder(destination);
+        }
+
+
+        return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
     }
 
-    private void trouverCompte(String numero) {
-        repository.trouver(numero).orElseThrow(() -> new CompteIntrouvableException((numero)));
+    private Compte trouverCompte(String numero) {
+        return repository.trouver(numero).orElseThrow(() -> new CompteIntrouvableException((numero)));
     }
 }
