@@ -49,7 +49,7 @@ class VirementServiceImplTest {
     @ValueSource(strings = {"0", "0.00", "-0.01", "-10.00"})
     void verifierMontantNullNulOuNegatifRetourneUneException(String valeur) {
 
-        // Assert
+        // Arrange
         BigDecimal montant = valeur == null ? null : new BigDecimal(valeur);
 
         // Act / Assert
@@ -61,7 +61,7 @@ class VirementServiceImplTest {
     @Test
     @DisplayName("Faire un virement vers le même compte est refusé")
     void VirementVersLeMemeCompteEstRefuse() {
-        // Assert
+        // Arrange
         BigDecimal montant = new BigDecimal("10");
 
         // Act / Assert
