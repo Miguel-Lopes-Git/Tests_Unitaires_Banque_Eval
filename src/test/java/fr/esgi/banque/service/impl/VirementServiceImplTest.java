@@ -1,10 +1,8 @@
 package fr.esgi.banque.service.impl;
 
+import fr.esgi.banque.business.SoldeInsuffisantException;
 import fr.esgi.banque.business.Virement;
 import java.time.LocalDate;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
 import fr.esgi.banque.business.Compte;
 import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
@@ -27,6 +25,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class VirementServiceImplTest {
@@ -127,6 +130,29 @@ class VirementServiceImplTest {
         verify(repository).sauvegarder(destination);
 
         assertEquals(new Virement(NUMERO_SOURCE, NUMERO_DESTINATION, montant, LocalDate.of(2026, 11, 13)), virement);
+    }
+
+    // V5	Si le solde de la source est insuffisant, la SoldeInsuffisantException remonte et rien n'est sauvegardé.
+
+    @Test
+    @DisplayName("Refuser un virement sans sauvegarde si le solde est insuffisant")
+    void verifierSoldeInsuffisantRefuseVirementSansSauvegarde() {
+        // Arrange
+        BigDecimal montant = new BigDecimal("300.01");
+
+        Compte source = new Compte(NUMERO_SOURCE, "Test", new BigDecimal("100"), new BigDecimal("200"));
+        Compte destination = new Compte(NUMERO_DESTINATION, "Test2", new BigDecimal("50"), BigDecimal.ZERO);
+
+        when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
+        when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.of(destination));
+
+        // Act / Assert
+        assertThrows(SoldeInsuffisantException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
+
+        verify(repository, never()).sauvegarder(any());
+
+        assertThat(source.getSolde()).isEqualByComparingTo("100");
+        assertThat(destination.getSolde()).isEqualByComparingTo("50");
     }
 
 }
