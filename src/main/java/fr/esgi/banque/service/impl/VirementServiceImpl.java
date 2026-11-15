@@ -23,12 +23,8 @@ public class VirementServiceImpl {
     }
 
     public Virement virer(String numeroSource, String numeroDestination, BigDecimal montant) {
-        if (montant == null || montant.signum() <= 0) {
-            throw new IllegalArgumentException("Le montant du virement doit être strictement positif");
-        }
-        if (numeroSource.equals(numeroDestination)) {
-            throw new IllegalArgumentException("Un virement ne peut pas être effectué vers le même compte");
-        }
+        verifierParametres(numeroSource, numeroDestination, montant);
+
         Compte source = trouverCompte(numeroSource);
         Compte destination = trouverCompte(numeroDestination);
 
@@ -42,6 +38,15 @@ public class VirementServiceImpl {
 
 
         return new Virement(numeroSource, numeroDestination, montant, LocalDate.now(horloge));
+    }
+
+    private void verifierParametres(String numeroSource, String numeroDestination, BigDecimal montant) {
+        if (montant == null || montant.signum() <= 0) {
+            throw new IllegalArgumentException("Le montant du virement doit être strictement positif");
+        }
+        if (numeroSource.equals(numeroDestination)) {
+            throw new IllegalArgumentException("Un virement ne peut pas être effectué vers le même compte");
+        }
     }
 
     private Compte trouverCompte(String numero) {
