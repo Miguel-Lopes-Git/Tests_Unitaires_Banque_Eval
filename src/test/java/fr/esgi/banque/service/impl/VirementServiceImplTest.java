@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Mock;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -30,6 +31,9 @@ import static org.mockito.Mockito.never;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class VirementServiceImplTest {
@@ -159,6 +163,38 @@ class VirementServiceImplTest {
 
         assertThat(source.getSolde()).isEqualByComparingTo("100");
         assertThat(destination.getSolde()).isEqualByComparingTo("50");
+    }
+
+    // V6	Un virement strictement supérieur à 10 000 € déclenche une alerte au titulaire du compte source (NotificationService.alerter). Pas d'alerte sinon.
+
+    @ParameterizedTest(name = "{0} € : {1} alerte attendue")
+    @CsvSource({
+            "9999.99, 0",
+            "10000, 0",
+            "10000.00, 0",
+            "10000.01, 1",
+            "15000, 1"
+    })
+    @DisplayName("Alerter le titulaire uniquement au-delà de 10 000 €")
+    void verifierAlerteSelonMontantDuVirement(String valeur, int nombreAlertes) {
+        // Arrange
+        BigDecimal montant = new BigDecimal(valeur);
+
+        Compte source = new Compte(NUMERO_SOURCE, "Test", new BigDecimal("20000"), BigDecimal.ZERO);
+        Compte destination = new Compte(NUMERO_DESTINATION, "Test2", new BigDecimal("50"), BigDecimal.ZERO);
+
+        configurerComptesExistants(source, destination);
+
+        // Act
+        service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant);
+
+        // Assert
+        verify(notifications, times(nombreAlertes))
+                .alerter(any(), any());
+
+        if (nombreAlertes > 0) {
+            verify(notifications).alerter(eq(source.getTitulaire()), anyString());
+        }
     }
 
 }
