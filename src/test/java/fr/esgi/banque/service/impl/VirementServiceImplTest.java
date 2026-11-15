@@ -4,6 +4,7 @@ import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -53,5 +54,17 @@ class VirementServiceImplTest {
 
         // Act / Assert
         assertThrows(IllegalArgumentException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
+    }
+
+    // V2	Un virement vers le même compte est refusé : IllegalArgumentException.
+
+    @Test
+    @DisplayName("Faire un virement vers le même compte est refusé")
+    void VirementVersLeMemeCompteEstRefuse() {
+        // Assert
+        BigDecimal montant = new BigDecimal("10");
+
+        // Act / Assert
+        assertThrows(IllegalArgumentException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_SOURCE, montant));
     }
 }
