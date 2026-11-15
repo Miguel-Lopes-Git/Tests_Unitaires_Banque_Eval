@@ -3,6 +3,7 @@ package fr.esgi.banque.service.impl;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class VirementServiceImplTest {
+
+    private static final String NUMERO_SOURCE = "FR001";
+    private static final String NUMERO_DESTINATION = "FR002";
 
     @Mock
     CompteRepository repository;
@@ -38,15 +42,16 @@ class VirementServiceImplTest {
 
     // V1	Un montant null, nul ou négatif est refusé : IllegalArgumentException.
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Le virement de {0}€ est refusé")
+    @DisplayName("Vérifier si un montant Null, Nul ou negatif retourne une exception")
     @NullSource
     @ValueSource(strings = {"0", "0.00", "-0.01", "-10.00"})
     void verifierMontantNullNulOuNegatifRetourneUneException(String valeur) {
 
-        // Vaut null ou un nombre
+        // Assert
         BigDecimal montant = valeur == null ? null : new BigDecimal(valeur);
 
-        //Act / Assert
-        assertThrows(IllegalArgumentException.class, () -> service.virer("FR001", "FR002", montant));
+        // Act / Assert
+        assertThrows(IllegalArgumentException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
     }
 }
