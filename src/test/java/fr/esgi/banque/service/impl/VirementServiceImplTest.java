@@ -1,5 +1,7 @@
 package fr.esgi.banque.service.impl;
 
+import fr.esgi.banque.business.Compte;
+import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +18,10 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class VirementServiceImplTest {
@@ -66,5 +70,31 @@ class VirementServiceImplTest {
 
         // Act / Assert
         assertThrows(IllegalArgumentException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_SOURCE, montant));
+    }
+
+    // V3	Si l'un des deux comptes n'existe pas (trouver renvoie Optional.empty()) : CompteIntrouvableException.
+
+    @Test
+    @DisplayName("Faire un virement depuis un compte source inexistant retourne une exception")
+    void VirementDepuisUnCompteSourceInexistantRetourneUneException() {
+        // Arrange
+        BigDecimal montant = new BigDecimal("10");
+        when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.empty());
+
+        // Assert
+        assertThrows(CompteIntrouvableException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
+    }
+
+    @Test
+    @DisplayName("Faire un virement vers un compte de destination inexistant retourne une exception")
+    void VirementVersUnCompteDeDestinationInexistantRetourneUneException() {
+        // Arrange
+        BigDecimal montant = new BigDecimal("10");
+        Compte source = new Compte(NUMERO_SOURCE, "Test", new BigDecimal("100"), new BigDecimal("200"));
+        when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
+        when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.empty());
+
+        // Assert
+        assertThrows(CompteIntrouvableException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
     }
 }
