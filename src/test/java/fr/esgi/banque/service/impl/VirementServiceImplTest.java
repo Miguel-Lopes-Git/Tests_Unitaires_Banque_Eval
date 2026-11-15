@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Mock;
 import org.junit.jupiter.params.provider.CsvSource;
+import fr.esgi.banque.service.VirementRefuseException;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -195,6 +196,23 @@ class VirementServiceImplTest {
         if (nombreAlertes > 0) {
             verify(notifications).alerter(eq(source.getTitulaire()), anyString());
         }
+    }
+
+    // V7	Aucun virement n'est accepté le dimanche : VirementRefuseException, et aucun compte n'est sauvegardé.
+
+    @Test
+    @DisplayName("Refuser les virements le dimanche sans sauvegarde")
+    void verifierVirementDimancheRefuseSansSauvegarde() {
+        //Arrange
+        BigDecimal montant = new BigDecimal("10");
+
+        Clock horlogeDimanche = Clock.fixed(Instant.parse("2026-11-15T12:00:00Z"), ZoneOffset.UTC);
+
+        VirementServiceImpl serviceDimanche = new VirementServiceImpl(repository, notifications, horlogeDimanche);
+
+        //Act / Assert
+        assertThrows(VirementRefuseException.class, () -> serviceDimanche.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
+        verify(repository, never()).sauvegarder(any());
     }
 
 }
