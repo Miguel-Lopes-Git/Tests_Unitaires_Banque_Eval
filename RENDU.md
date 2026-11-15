@@ -61,3 +61,9 @@
 ![Couverture de code IntelliJ de la partie A](docs/partie-a-couverture-intellij.png)
 
 ![Résultats des 55 tests de la partie A dans IntelliJ](docs/partie-a-tests-intellij.png)
+
+### Partie B : Service de virement
+
+![Couverture de code IntelliJ de la partie B](docs/partie-b-couverture-intellij.png)
+
+![Résultats des 16 tests de la partie B dans IntelliJ](docs/partie-b-tests-intellij.png)
