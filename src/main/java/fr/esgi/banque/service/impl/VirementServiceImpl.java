@@ -1,5 +1,6 @@
 package fr.esgi.banque.service.impl;
 
+import fr.esgi.banque.service.CompteIntrouvableException;
 import fr.esgi.banque.service.CompteRepository;
 import fr.esgi.banque.service.NotificationService;
 
@@ -25,5 +26,7 @@ public class VirementServiceImpl {
         if (numeroSource.equals(numeroDestination)) {
             throw new IllegalArgumentException("Un virement ne peut pas être effectué vers le même compte");
         }
+        repository.trouver(numeroSource).orElseThrow(() -> new CompteIntrouvableException((numeroSource)));
+        repository.trouver(numeroDestination).orElseThrow(() -> new CompteIntrouvableException((numeroDestination)));
     }
 }
