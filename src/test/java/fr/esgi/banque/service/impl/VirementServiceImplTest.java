@@ -48,6 +48,12 @@ class VirementServiceImplTest {
 
     VirementServiceImpl service;
 
+    private void configurerComptesExistants(Compte source, Compte destination) {
+        when(repository.trouver(source.getNumero())).thenReturn(Optional.of(source));
+
+        when(repository.trouver(destination.getNumero())).thenReturn(Optional.of(destination));
+    }
+
     @BeforeEach
     void CreerService() {
         service = new VirementServiceImpl(repository, notifications, horloge);
@@ -107,6 +113,8 @@ class VirementServiceImplTest {
     }
 
     // V4	Cas nominal : le compte source est débité, le compte destination est crédité, les deux comptes sont sauvegardés. Le Virement renvoyé contient la date du jour.
+
+
     @Test
     @DisplayName("Effectuer un virement et renvoyer ses informations")
     void verifierVirementDebiteCrediteSauvegardeEtRetourneLaDate() {
@@ -116,8 +124,7 @@ class VirementServiceImplTest {
         Compte source = new Compte(NUMERO_SOURCE, "Test", new BigDecimal("100"), new BigDecimal("200"));
         Compte destination = new Compte(NUMERO_DESTINATION, "Test2", new BigDecimal("50"), BigDecimal.ZERO);
 
-        when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
-        when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.of(destination));
+        configurerComptesExistants(source, destination);
 
         // Act
         Virement virement = service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant);
@@ -143,8 +150,7 @@ class VirementServiceImplTest {
         Compte source = new Compte(NUMERO_SOURCE, "Test", new BigDecimal("100"), new BigDecimal("200"));
         Compte destination = new Compte(NUMERO_DESTINATION, "Test2", new BigDecimal("50"), BigDecimal.ZERO);
 
-        when(repository.trouver(NUMERO_SOURCE)).thenReturn(Optional.of(source));
-        when(repository.trouver(NUMERO_DESTINATION)).thenReturn(Optional.of(destination));
+        configurerComptesExistants(source, destination);
 
         // Act / Assert
         assertThrows(SoldeInsuffisantException.class, () -> service.virer(NUMERO_SOURCE, NUMERO_DESTINATION, montant));
